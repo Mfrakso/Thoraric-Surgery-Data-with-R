@@ -1,0 +1,72 @@
+Data File
+library(foreign)
+surgeryData <- read.arff("C:/Users/FRAKMOH/Desktop/R working directory/ThoraricSurgery.arff")
+Binary Logistic Regression Model
+surgeryData$Risk1Yr <- relevel(surgeryData$Risk1Yr, "T")
+surgeryModel <- glm(Risk1Yr ~ PRE4 + PRE5+PRE6+PRE7+PRE8+PRE9+PRE10+PRE11+PRE14+PRE17+PRE19+PRE25+PRE30+PRE32+AGE, data = surgeryData, family = binomial())
+summary(surgeryModel)
+## 
+## Call:
+## glm(formula = Risk1Yr ~ PRE4 + PRE5 + PRE6 + PRE7 + PRE8 + PRE9 + 
+##     PRE10 + PRE11 + PRE14 + PRE17 + PRE19 + PRE25 + PRE30 + PRE32 + 
+##     AGE, family = binomial(), data = surgeryData)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.6082   0.3301   0.4576   0.5556   1.7065  
+## 
+## Coefficients:
+##               Estimate Std. Error z value Pr(>|z|)   
+## (Intercept)  2.262e+00  1.393e+00   1.624  0.10430   
+## PRE4         1.581e-01  1.758e-01   0.899  0.36850   
+## PRE5         2.246e-02  1.697e-02   1.324  0.18554   
+## PRE6PRZ1     4.713e-01  5.073e-01   0.929  0.35294   
+## PRE6PRZ2     2.844e-01  7.596e-01   0.374  0.70809   
+## PRE7T       -6.323e-01  5.339e-01  -1.184  0.23631   
+## PRE8T       -2.593e-01  3.723e-01  -0.696  0.48613   
+## PRE9T       -1.185e+00  4.771e-01  -2.483  0.01301 * 
+## PRE10T      -4.836e-01  4.726e-01  -1.023  0.30628   
+## PRE11T      -5.423e-01  3.866e-01  -1.403  0.16063   
+## PRE14OC12   -4.387e-01  3.195e-01  -1.373  0.16974   
+## PRE14OC13   -1.281e+00  5.904e-01  -2.170  0.03000 * 
+## PRE14OC14   -1.674e+00  5.804e-01  -2.884  0.00392 **
+## PRE17T      -9.511e-01  4.307e-01  -2.208  0.02723 * 
+## PRE19T       1.380e+01  1.003e+03   0.014  0.98902   
+## PRE25T      -3.013e-01  8.910e-01  -0.338  0.73526   
+## PRE30T      -7.976e-01  4.486e-01  -1.778  0.07541 . 
+## PRE32T       1.325e+01  1.002e+03   0.013  0.98945   
+## AGE          6.039e-03  1.722e-02   0.351  0.72588   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 395.61  on 469  degrees of freedom
+## Residual deviance: 359.28  on 451  degrees of freedom
+## AIC: 397.28
+## 
+## Number of Fisher Scoring iterations: 14
+Variables with Greatest Effect
+The variables that had the greatest effect on the survival rate by importance order are: PRE17: Type 2 DM, PRE30: Smoking, PRE7: Pain before surgery, AGE: Age at surgery, and PRE11: Weakness before surgery. ## Accuracy of the Model For the null model -2LL = 395.61, but when we includ all variables in our dataset to predict if the patients survived or not after 1 year of the surgery this value has been reduced to 359.29. This reduction tells us that the model is better at predicting wether someone was will survive or not one year after the surgery.
+The accuracy of our model or how much better the model predicts the outcome variable can be assesed using the model chi-square statistic.
+modelChi <- surgeryModel$null.deviance - surgeryModel$deviance
+modelChi
+## [1] 36.32865
+chidf <- surgeryModel$df.null - surgeryModel$df.residual
+chidf
+## [1] 18
+Now we calvulate the probability associated with the chi-square
+chisq.prob <- 1 - pchisq(modelChi, chidf)
+chisq.prob
+## [1] 0.006402365
+The p-value is .006 and since it is less than .05, we can reject the null hypothesis that the model is not better than chance at predicting the outcome.
+Below are the odds ratio for ech variable
+exp(surgeryModel$coefficients)
+##  (Intercept)         PRE4         PRE5     PRE6PRZ1     PRE6PRZ2 
+## 9.606191e+00 1.171271e+00 1.022713e+00 1.602001e+00 1.328976e+00 
+##        PRE7T        PRE8T        PRE9T       PRE10T       PRE11T 
+## 5.313945e-01 7.715763e-01 3.058007e-01 6.165898e-01 5.813995e-01 
+##    PRE14OC12    PRE14OC13    PRE14OC14       PRE17T       PRE19T 
+## 6.449011e-01 2.777066e-01 1.874960e-01 3.863016e-01 9.842916e+05 
+##       PRE25T       PRE30T       PRE32T          AGE 
+## 7.398600e-01 4.504072e-01 5.673536e+05 1.006057e+00
